@@ -14,4 +14,5 @@ public class PlayerState {
   private String clientID;
   private int x;
   private int y;
+  private double angle;
 }

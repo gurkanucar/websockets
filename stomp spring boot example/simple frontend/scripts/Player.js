@@ -1,5 +1,15 @@
 export default class Player {
-  constructor(myGameArea, userId, width, height, color, x, y) {
+  constructor(
+    myGameArea,
+    userId,
+    width,
+    height,
+    color,
+    x,
+    y,
+    angle = 0,
+    moveAngle = 0
+  ) {
     this.myGameArea = myGameArea;
     this.userId = userId;
     this.width = width;
@@ -8,8 +18,12 @@ export default class Player {
     this.x = x;
     this.y = y;
     this.speed = 0;
-    this.angle = 0;
-    this.moveAngle = 0;
+    this.angle = angle;
+    this.prevX = x;
+    this.prevY = y;
+    this.prevAngle = 0;
+    this.prevMoveAngle = 0;
+    this.moveAngle = moveAngle;
     this.xMin = 0;
     this.xMax = myGameArea.canvas.width;
     this.yMin = 0;
@@ -32,9 +46,15 @@ export default class Player {
   }
 
   newPos() {
+    this.prevX = this.x;
+    this.prevY = this.y;
+    this.prevAngle = this.angle;
+
     this.angle += (this.moveAngle * Math.PI) / 180;
     this.x += this.speed * Math.sin(this.angle);
     this.y -= this.speed * Math.cos(this.angle);
+
+
 
     // Check if the new x position is within the xMin and xMax bounds
     if (this.x < this.xMin) {
@@ -49,5 +69,12 @@ export default class Player {
     } else if (this.y > this.yMax) {
       this.y = this.yMax;
     }
+  }
+  hasPositionChanged() {
+    return (
+      this.x != this.prevX ||
+      this.y != this.prevY ||
+      this.angle != this.prevAngle
+    );
   }
 }
