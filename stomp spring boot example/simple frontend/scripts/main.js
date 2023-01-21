@@ -32,7 +32,7 @@ export const updateGameArea = () => {
 
   if (myGameArea.keys[32]) {
     const now = new Date().getTime();
-    if (now - myGameArea.lastFired > 100) {
+    if (now - myGameArea.lastFired > 400) {
       myGameArea.lastFired = now;
       const player = gamePieces.find((p) => p instanceof Player);
       const bullet = new Bullet(
@@ -50,16 +50,16 @@ export const updateGameArea = () => {
     gamePieces[i].moveAngle = 0;
     gamePieces[i].speed = 0;
     if (gamePieces[i] instanceof Player) {
-      if (myGameArea.keys[37]) {
+      if (myGameArea.keys[37] || myGameArea.keys[65]) {
         gamePieces[i].moveAngle = -5;
       }
-      if (myGameArea.keys[39]) {
+      if (myGameArea.keys[39] || myGameArea.keys[68]) {
         gamePieces[i].moveAngle = 5;
       }
-      if (myGameArea.keys[38]) {
+      if (myGameArea.keys[38] || myGameArea.keys[87]) {
         gamePieces[i].speed = 5;
       }
-      if (myGameArea.keys[40]) {
+      if (myGameArea.keys[40] || myGameArea.keys[83]) {
         gamePieces[i].speed = -5;
       }
 
