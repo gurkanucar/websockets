@@ -3,19 +3,26 @@ import { updateGameArea } from "./main.js";
 export default class GameArea {
   constructor() {
     this.canvas = document.createElement("canvas");
-    this.canvas.width = 480;
-    this.canvas.height = 270;
+    this.canvas.width = 500;
+    this.canvas.height = 500;
     this.lastFired = 0;
     this.context = this.canvas.getContext("2d");
-    document.body.insertBefore(this.canvas, document.body.childNodes[0]);
     this.frameNo = 0;
     this.keys = {};
+
+    //add to body
+    const container = document.createElement("div");
+    container.style.display = "flex";
+    container.style.alignItems = "center";
+    container.style.justifyContent = "center";
+    document.body.appendChild(container);
+    container.appendChild(this.canvas);
   }
 
   start() {
     updateGameArea();
     window.addEventListener("keydown", (e) => {
-      e.preventDefault();
+      //e.preventDefault();
       this.keys[e.keyCode] = e.type === "keydown";
     });
     window.addEventListener("keyup", (e) => {
