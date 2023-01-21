@@ -80,7 +80,10 @@ public class WebSocketServerController {
       for (SimpSession session : user.getSessions()) {
         if (session.getSubscriptions().stream()
             .anyMatch(subscription -> subscription.getDestination().endsWith(room))) {
-          log.info("found: {}", user.getName());
+          log.info("currentUser: {}", user.getName());
+          if (!user.getName().equals(principal.getName())) {
+            messagingTemplate.convertAndSend("/topic/room/" + room, event);
+          }
         }
       }
     }

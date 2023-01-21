@@ -49,7 +49,11 @@ const connect = () => {
     // Subscribe to a destination
     stompClient.subscribe("/topic/room/" + roomValue.value, function (message) {
       var event = JSON.parse(message.body);
-      console.log("Received message: " + event.message);
+      incomingData.push(event);
+
+      document.getElementById("incomingData").innerText = JSON.stringify(event);
+      document.getElementById("incomingDataList").innerText =
+        JSON.stringify(incomingData);
     });
   });
 };

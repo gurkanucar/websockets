@@ -1,0 +1,5 @@
+https://docs.spring.io/spring-framework/docs/4.1.0.RC1/spring-framework-reference/html/websocket.html#websocket-stomp-appplication-context-events
+
+https://docs.spring.io/spring-framework/docs/4.1.0.RC1/spring-framework-reference/html/websocket.html#websocket-stomp-appplication-context-events
+
+**** https://www.toptal.com/java/stomp-spring-boot-websocket
