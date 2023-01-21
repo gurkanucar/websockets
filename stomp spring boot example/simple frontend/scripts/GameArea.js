@@ -1,10 +1,10 @@
 import { updateGameArea } from "./main.js";
 
 export default class GameArea {
-  constructor() {
+  constructor(width = 500, height = 500) {
     this.canvas = document.createElement("canvas");
-    this.canvas.width = 500;
-    this.canvas.height = 500;
+    this.canvas.width = width;
+    this.canvas.height = height;
     this.lastFired = 0;
     this.context = this.canvas.getContext("2d");
     this.frameNo = 0;

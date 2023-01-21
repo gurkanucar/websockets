@@ -1,5 +1,3 @@
-
-
 export default class Player {
   constructor(myGameArea, userId, width, height, color, x, y) {
     this.myGameArea = myGameArea;
@@ -13,9 +11,9 @@ export default class Player {
     this.angle = 0;
     this.moveAngle = 0;
     this.xMin = 0;
-    this.xMax = 480;
+    this.xMax = myGameArea.canvas.width;
     this.yMin = 0;
-    this.yMax = 270;
+    this.yMax = myGameArea.canvas.height;
   }
 
   update() {

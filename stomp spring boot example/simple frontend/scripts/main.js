@@ -5,7 +5,10 @@ import Bullet from "./Bullet.js";
 
 var gamePieces = [];
 
-const myGameArea = new GameArea();
+const gameWidth = 500;
+const gameHeight = 500;
+
+const myGameArea = new GameArea(gameWidth, gameHeight);
 const myPlayer = new Player(myGameArea, "playerMe", 30, 30, "red", 225, 225);
 const dummyPlayer = new DummyPlayer(myGameArea, 30, 30, "green", 150, 150);
 const dummyPlayer2 = new DummyPlayer(myGameArea, 30, 30, "green", 10, 20);
@@ -29,7 +32,7 @@ export const updateGameArea = () => {
 
   if (myGameArea.keys[32]) {
     const now = new Date().getTime();
-    if (now - myGameArea.lastFired > 500) {
+    if (now - myGameArea.lastFired > 100) {
       myGameArea.lastFired = now;
       const player = gamePieces.find((p) => p instanceof Player);
       const bullet = new Bullet(
@@ -67,9 +70,9 @@ export const updateGameArea = () => {
     if (gamePieces[i] instanceof Bullet) {
       gamePieces[i].update();
       if (
-        gamePieces[i].x > 480 ||
+        gamePieces[i].x > gameWidth ||
         gamePieces[i].x < 0 ||
-        gamePieces[i].y > 270 ||
+        gamePieces[i].y > gameHeight ||
         gamePieces[i].y < 0
       ) {
         gamePieces.splice(i, 1);
