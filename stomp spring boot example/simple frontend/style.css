@@ -1,0 +1,8 @@
+.root {
+  background-color: greenyellow;
+  flex-direction: column;
+}
+
+.myCanvas {
+  background-color: red;
+}
