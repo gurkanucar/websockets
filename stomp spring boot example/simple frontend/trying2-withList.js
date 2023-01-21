@@ -203,7 +203,12 @@ class GamePiece {
     ctx.translate(this.x, this.y);
     ctx.rotate(this.angle);
     ctx.fillStyle = this.color;
-    ctx.fillRect(this.width / -2, this.height / -2, this.width, this.height);
+    ctx.beginPath();
+    ctx.moveTo(0, -this.height / 2);
+    ctx.lineTo(-this.width / 2, this.height / 2);
+    ctx.lineTo(this.width / 2, this.height / 2);
+    ctx.closePath();
+    ctx.fill();
     ctx.restore();
   }
 
@@ -231,6 +236,16 @@ class GamePiece {
 class DummyGamePiece extends GamePiece {
   constructor(width, height, color, x, y) {
     super(null, width, height, color, x, y);
+  }
+
+  update() {
+    const ctx = myGameArea.context;
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.angle);
+    ctx.fillStyle = this.color;
+    ctx.fillRect(this.width / -2, this.height / -2, this.width, this.height);
+    ctx.restore();
   }
 
   newPos() {
@@ -281,7 +296,12 @@ const dummyGamePiece3 = new DummyGamePiece(30, 30, "green", 420, 180);
 const dummyGamePiece4 = new DummyGamePiece(30, 30, "green", 40, 200);
 
 gamePieces.push(myGamePiece);
-gamePieces.push(dummyGamePiece,dummyGamePiece2,dummyGamePiece3,dummyGamePiece4);
+gamePieces.push(
+  dummyGamePiece,
+  dummyGamePiece2,
+  dummyGamePiece3,
+  dummyGamePiece4
+);
 //gamePieces.push(myGamePiece2);
 
 function startGame() {
