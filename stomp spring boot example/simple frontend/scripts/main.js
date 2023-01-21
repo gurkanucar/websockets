@@ -57,7 +57,7 @@ const connect = () => {
             data.clientID,
             30,
             30,
-            "red",
+            "black",
             data.x,
             data.y,
             data.angle
