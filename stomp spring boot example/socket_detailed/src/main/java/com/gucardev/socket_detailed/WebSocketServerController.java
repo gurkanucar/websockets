@@ -37,9 +37,8 @@ public class WebSocketServerController {
 
   @EventListener
   public void handleWebSocketConnectListener(SessionDisconnectEvent event) {
-    StompHeaderAccessor headers = StompHeaderAccessor.wrap(event.getMessage());
-    String sessionId = headers.getSessionId();
-    log.info("Session disconnected => ID: {}", sessionId);
+    log.info("Session disconnected => ID: {}", event.getUser().getName());
+    messagingTemplate.convertAndSend("/topic/disconnected", new Event(event.getUser().getName()));
   }
 
   @MessageMapping("/event")

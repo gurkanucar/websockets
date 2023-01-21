@@ -37,8 +37,8 @@ const ctx = canvas.getContext("2d");
 const height = 500,
   width = 500;
 
-const charHeight = 50,
-  charWidth = 50;
+const charHeight = 30,
+  charWidth = 30;
 
 canvas.width = width;
 canvas.height = height;
@@ -80,7 +80,7 @@ const messageInput = document.getElementById("message");
 const roomValue = document.getElementById("room");
 
 const connect = () => {
-  const socket = new SockJS("http://localhost:8080/ws");
+  const socket = new SockJS("http://192.168.0.27:8080/ws");
   const stompClient = Stomp.over(socket);
   //stompClient.debug = null;
   stompClientGlobal = stompClient;
@@ -120,6 +120,11 @@ const connect = () => {
         );
       }
     );
+
+    stompClient.subscribe("/topic/disconnected", function (data) {
+      const disconnectedUser = JSON.parse(data.body).message;
+      clients = clients.filter((x) => x.clientID != disconnectedUser);
+    });
   });
 };
 
