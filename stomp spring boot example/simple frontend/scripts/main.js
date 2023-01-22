@@ -28,7 +28,7 @@ const myGameArea = new GameArea(gameWidth, gameHeight);
 const connect = () => {
   const socket = new SockJS("http://192.168.0.27:8080/ws");
   const stompClient = Stomp.over(socket);
-  stompClient.debug = null;
+  //stompClient.debug = null;
   stompClientGlobal = stompClient;
   stompClient.connect({}, (frame) => {
     clientID = frame.headers["user-name"];
@@ -40,6 +40,12 @@ const connect = () => {
 
     // Subscribe to a destination
     stompClient.subscribe("/topic/game/" + roomValue.value, function (message) {
+      //document.getElementById("incomingData").innerText = JSON.stringify(data);
+      //   document.getElementById("incomingDataList").innerText =
+      //     JSON.stringify(incomingData);
+    });
+
+    stompClient.subscribe("/user/queue/reply", (message) => {
       let data = JSON.parse(message.body);
       // incomingData.push(event);
 
@@ -50,7 +56,7 @@ const connect = () => {
         client.x = data.x;
         client.y = data.y;
         client.angle = data.angle;
-      } else if (data.clientID != clientID) {
+      } else {
         clients.push(
           new Player(
             myGameArea,
@@ -64,10 +70,9 @@ const connect = () => {
           )
         );
       }
-
-      document.getElementById("incomingData").innerText = JSON.stringify(data);
-      //   document.getElementById("incomingDataList").innerText =
-      //     JSON.stringify(incomingData);
+      document.getElementById("incomingData").innerText = JSON.parse(
+        message.body
+      );
     });
 
     stompClient.subscribe(
@@ -111,12 +116,12 @@ export const updateGameArea = () => {
 
   if (myGameArea.keys[32]) {
     const now = new Date().getTime();
-    if (now - myGameArea.lastFired > 400) {
+    if (now - myGameArea.lastFired > 200) {
       myGameArea.lastFired = now;
       const player = gamePieces.find((p) => p instanceof Player);
       const bullet = new Bullet(
         myGameArea,
-        "playerMe",
+        clientID,
         player.x,
         player.y,
         player.angle
@@ -171,3 +176,24 @@ export const updateGameArea = () => {
 
 document.getElementById("connect").addEventListener("click", connect);
 // document.getElementById('send_btn').addEventListener("click", signup)
+
+// const socket = new SockJS("http://192.168.0.27:8080/ws");
+// const stompClient = Stomp.over(socket);
+// //stompClient.debug = null;
+// stompClient.connect({}, (frame) => {
+//   stompClient.subscribe("/topic/game/oda1", function (message) {
+//     console.log("Received message on /topic/hello: ", message);
+//   });
+//   stompClient.subscribe("/user/queue/reply", function (message) {
+//     alert(message);
+//     console.log("Received message on /user/queue/reply: ", message);
+//   });
+// });
+// document.getElementById("connect").addEventListener("click", () => {
+//   console.log("yolla!");
+//   stompClient.send(
+//     "/app/game/oda1",
+//     {},
+//     JSON.stringify({ message: document.getElementById("message").value })
+//   );
+// });
