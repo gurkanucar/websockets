@@ -1,4 +1,4 @@
-package com.gucardev.socket_detailed;
+package com.gucardev.socket_detailed.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

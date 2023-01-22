@@ -1,4 +1,4 @@
-package com.gucardev.socket_detailed;
+package com.gucardev.socket_detailed.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;

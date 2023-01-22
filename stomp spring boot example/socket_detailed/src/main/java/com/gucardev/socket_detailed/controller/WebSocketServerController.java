@@ -1,6 +1,7 @@
-package com.gucardev.socket_detailed;
+package com.gucardev.socket_detailed.controller;
 
 import com.gucardev.socket_detailed.model.BulletState;
+import com.gucardev.socket_detailed.model.Event;
 import com.gucardev.socket_detailed.model.GameObjectState;
 import com.gucardev.socket_detailed.model.GameObjectType;
 import com.gucardev.socket_detailed.model.PlayerState;
