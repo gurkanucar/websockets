@@ -12,7 +12,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
   @Override
   public void configureMessageBroker(MessageBrokerRegistry config) {
-    config.enableSimpleBroker("/topic", "/queue", "/user");
+    config.enableSimpleBroker("/topic", "/queue");
     config.setUserDestinationPrefix("/user");
     //topic added again to handle SubscribeMapping
     config.setApplicationDestinationPrefixes("/app", "/topic");
@@ -25,6 +25,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         .setAllowedOriginPatterns("*")
         .setHandshakeHandler(new CustomHandshakeHandler())
         .withSockJS();
-    ;
   }
+//
+//  @Override
+//  public void configureClientInboundChannel(ChannelRegistration registration) {
+//    registration.interceptors(new UserInterceptor());
+//  }
+
+
+
 }

@@ -1,7 +1,10 @@
 package com.gucardev.socket_detailed;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -23,7 +26,7 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 @RequiredArgsConstructor
 @Slf4j
 public class WebSocketServerController {
-  // how can i get session in @MessageMapping("/event") method?
+
   private final SimpMessagingTemplate messagingTemplate;
   private final SimpUserRegistry simpUserRegistry;
   // private final SubscriptionRegistry subscriptionRegistry;
@@ -41,12 +44,6 @@ public class WebSocketServerController {
     messagingTemplate.convertAndSend("/topic/disconnected", new Event(event.getUser().getName()));
   }
 
-  @MessageMapping("/event")
-  public void handleEvent(Event event, SimpMessageHeaderAccessor headers) {
-    log.info("/event => ID: {}", headers.getSessionId());
-    // messagingTemplate.convertAndSendToUser(sessionId, "/queue/events", event);
-  }
-
   @SubscribeMapping("/game/{room}")
   public void subscribeToRoom(@DestinationVariable String room, SimpMessageHeaderAccessor headers)
       throws Exception {
@@ -55,60 +52,25 @@ public class WebSocketServerController {
   }
 
   @MessageMapping("/game/{room}")
-  public void getMessagePlayerStateFromRoom(
-      @DestinationVariable String room,
-      SimpMessageHeaderAccessor headers,
-      Principal principal,
-      @Payload PlayerState event)
-      throws Exception {
-    log.info(
-        "message: /room/{} => ID: {} , message: {}", room, principal.getName(), event.toString());
-    // messagingTemplate.convertAndSend("/topic/room/" + room, event);
-    String senderSessionId = headers.getSessionId();
-    // simpUserRegistry.getUsers();
+  public void handleMessage(
+      @DestinationVariable String room, @Payload PlayerState playerState, Principal principal) {
 
+    // messagingTemplate.convertAndSend("/topic/game/" + room, playerState);
+
+    // Get all the users in the application
     Collection<SimpUser> users = simpUserRegistry.getUsers();
+
     for (SimpUser user : users) {
       for (SimpSession session : user.getSessions()) {
         if (session.getSubscriptions().stream()
             .anyMatch(subscription -> subscription.getDestination().endsWith(room))) {
-          log.info("currentUser: {}", user.getName());
+          // If the user is subscribed to the room, add their userId to the list
           if (!user.getName().equals(principal.getName())) {
-            messagingTemplate.convertAndSend("/topic/game/" + room, event);
+            messagingTemplate.convertAndSendToUser(user.getName(), "/queue/reply", playerState);
           }
+          // usersInRoom.add(user.getName());
         }
       }
     }
-
-    //    new ArrayList<>(simpUserRegistry.getUsers()).get(0)//.getSession("bjahtmbr")
-  }
-
-  @MessageMapping("/room/{room}")
-  public void getMessageFromRoom(
-      @DestinationVariable String room,
-      SimpMessageHeaderAccessor headers,
-      Principal principal,
-      @Payload Event event)
-      throws Exception {
-    log.info(
-        "message: /room/{} => ID: {} , message: {}", room, principal.getName(), event.getMessage());
-    // messagingTemplate.convertAndSend("/topic/room/" + room, event);
-    String senderSessionId = headers.getSessionId();
-    // simpUserRegistry.getUsers();
-
-    Collection<SimpUser> users = simpUserRegistry.getUsers();
-    for (SimpUser user : users) {
-      for (SimpSession session : user.getSessions()) {
-        if (session.getSubscriptions().stream()
-            .anyMatch(subscription -> subscription.getDestination().endsWith(room))) {
-          log.info("currentUser: {}", user.getName());
-          if (!user.getName().equals(principal.getName())) {
-            messagingTemplate.convertAndSend("/topic/room/" + room, event);
-          }
-        }
-      }
-    }
-
-    //    new ArrayList<>(simpUserRegistry.getUsers()).get(0)//.getSession("bjahtmbr")
   }
 }
