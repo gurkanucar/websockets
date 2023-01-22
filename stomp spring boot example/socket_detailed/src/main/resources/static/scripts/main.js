@@ -60,10 +60,12 @@ const connect = () => {
         }
     );
 
-    stompClient.subscribe("/topic/disconnected", function (data) {
-      const disconnectedUser = JSON.parse(data.body).message;
-      clients = clients.filter((x) => x.clientID != disconnectedUser);
-    });
+    stompClient.subscribe("/topic/disconnected/" + roomValue.value,
+        function (data) {
+          const disconnectedUser = JSON.parse(data.body).message;
+          console.log("DISCONNECT!", disconnectedUser);
+          clients = clients.filter((x) => x.userId != disconnectedUser);
+        });
   });
 };
 
