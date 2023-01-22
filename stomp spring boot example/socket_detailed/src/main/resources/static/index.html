@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" type="text/css" href="/css/style.css">
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+</head>
+<body class="root">
+<div>
+  <input id="send_btn" disabled type="button" value="Gonder" />
+  <input id="connect" type="button" value="connect" />
+  <input id="room" placeholder="room" type="text" />
+  <input id="message" placeholder="message" type="text" />
+</div>
+<h5 id="incomingData">output</h5>
+<h4 id="incomingDataList"></h4>
+<!-- <canvas id="canvas" width="500" height="500" class="myCanvas"></canvas> -->
+</body>
+<script type="module" src="./scripts/main.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.4.0/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</html>

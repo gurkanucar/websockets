@@ -1,0 +1,16 @@
+.root {
+  background-color: greenyellow;
+  flex-direction: column;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+/* .myCanvas {
+  background-color: red;
+} */
+
+canvas {
+  border: 1px solid #d3d3d3;
+  background-color: #f1f1f1;
+}
