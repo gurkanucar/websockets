@@ -7,7 +7,7 @@ let clientID = "";
 const messageInput = document.getElementById("message");
 const roomValue = document.getElementById("room");
 
-let gamePieces = [];
+let gameObjects = [];
 let clients = [];
 let stompClientGlobal = undefined;
 
@@ -21,9 +21,9 @@ const myGameArea = new GameArea(gameWidth, gameHeight);
 // const dummyPlayer3 = new DummyPlayer(myGameArea, 30, 30, "green", 420, 180);
 // const dummyPlayer4 = new DummyPlayer(myGameArea, 30, 30, "green", 40, 200);
 
-// gamePieces.push(myPlayer);
-// gamePieces.push(dummyPlayer, dummyPlayer2, dummyPlayer3, dummyPlayer4);
-//gamePieces.push(myGamePiece2);
+// gameObjects.push(myPlayer);
+// gameObjects.push(dummyPlayer, dummyPlayer2, dummyPlayer3, dummyPlayer4);
+//gameObjects.push(gameObject);
 
 const connect = () => {
   const socket = new SockJS("http://192.168.0.27:8080/ws");
@@ -34,7 +34,7 @@ const connect = () => {
     clientID = frame.headers["user-name"];
 
     const myPlayer = new Player(myGameArea, clientID, 30, 30, "red", 225, 225);
-    gamePieces.push(myPlayer);
+    gameObjects.push(myPlayer);
 
     document.getElementById("send_btn").removeAttribute("disabled");
 
@@ -45,34 +45,12 @@ const connect = () => {
       //     JSON.stringify(incomingData);
     });
 
-    stompClient.subscribe("/user/queue/reply", (message) => {
-      let data = JSON.parse(message.body);
-      // incomingData.push(event);
+    stompClient.subscribe("/user/queue/player", (message) => {
+      handlePlayerEvents(message);
+    });
 
-      console.log(clients);
-      let client = clients.find((c) => c.userId == data.clientID);
-
-      if (client) {
-        client.x = data.x;
-        client.y = data.y;
-        client.angle = data.angle;
-      } else {
-        clients.push(
-          new Player(
-            myGameArea,
-            data.clientID,
-            30,
-            30,
-            "black",
-            data.x,
-            data.y,
-            data.angle
-          )
-        );
-      }
-      document.getElementById("incomingData").innerText = JSON.parse(
-        message.body
-      );
+    stompClient.subscribe("/user/queue/bullet", (message) => {
+      handleBulletEvents(message);
     });
 
     stompClient.subscribe(
@@ -95,6 +73,22 @@ const sendPosition = (player) => {
     "/app/game/" + roomValue.value,
     {},
     JSON.stringify({
+      type: "PLAYER",
+      clientID: clientID,
+      x: player.x,
+      y: player.y,
+      angle: player.angle,
+    })
+  );
+};
+
+const sendBullet = (player) => {
+  if (stompClientGlobal == undefined) return;
+  stompClientGlobal.send(
+    "/app/game/" + roomValue.value,
+    {},
+    JSON.stringify({
+      type: "BULLET",
       clientID: clientID,
       x: player.x,
       y: player.y,
@@ -118,7 +112,7 @@ export const updateGameArea = () => {
     const now = new Date().getTime();
     if (now - myGameArea.lastFired > 200) {
       myGameArea.lastFired = now;
-      const player = gamePieces.find((p) => p instanceof Player);
+      const player = gameObjects.find((p) => p instanceof Player);
       const bullet = new Bullet(
         myGameArea,
         clientID,
@@ -126,74 +120,107 @@ export const updateGameArea = () => {
         player.y,
         player.angle
       );
-      gamePieces.push(bullet);
+      gameObjects.push(bullet);
+      sendBullet(player);
     }
   }
 
-  for (let i = 0; i < gamePieces.length; i++) {
-    gamePieces[i].moveAngle = 0;
-    gamePieces[i].speed = 0;
-    if (gamePieces[i] instanceof Player) {
-      if (myGameArea.keys[37] || myGameArea.keys[65]) {
-        gamePieces[i].moveAngle = -5;
-      }
-      if (myGameArea.keys[39] || myGameArea.keys[68]) {
-        gamePieces[i].moveAngle = 5;
-      }
-      if (myGameArea.keys[38] || myGameArea.keys[87]) {
-        gamePieces[i].speed = 5;
-      }
-      if (myGameArea.keys[40] || myGameArea.keys[83]) {
-        gamePieces[i].speed = -5;
-      }
-
-      gamePieces[i].newPos();
-      gamePieces[i].update();
-      if (gamePieces[i].hasPositionChanged()) {
-        sendPosition(gamePieces[i]);
-      }
-    }
-
-    if (gamePieces[i] instanceof Bullet) {
-      gamePieces[i].update();
-      if (
-        gamePieces[i].x > gameWidth ||
-        gamePieces[i].x < 0 ||
-        gamePieces[i].y > gameHeight ||
-        gamePieces[i].y < 0
-      ) {
-        gamePieces.splice(i, 1);
-        continue;
-      }
-      gamePieces[i].checkCollision(gamePieces);
-    }
-  }
-
-  clients.forEach((x) => x.update());
+  processGameObjectsArray(gameObjects);
+  processGameObjectsArray(clients, true);
 
   requestAnimationFrame(updateGameArea);
 };
 
 document.getElementById("connect").addEventListener("click", connect);
-// document.getElementById('send_btn').addEventListener("click", signup)
 
-// const socket = new SockJS("http://192.168.0.27:8080/ws");
-// const stompClient = Stomp.over(socket);
-// //stompClient.debug = null;
-// stompClient.connect({}, (frame) => {
-//   stompClient.subscribe("/topic/game/oda1", function (message) {
-//     console.log("Received message on /topic/hello: ", message);
-//   });
-//   stompClient.subscribe("/user/queue/reply", function (message) {
-//     alert(message);
-//     console.log("Received message on /user/queue/reply: ", message);
-//   });
-// });
-// document.getElementById("connect").addEventListener("click", () => {
-//   console.log("yolla!");
-//   stompClient.send(
-//     "/app/game/oda1",
-//     {},
-//     JSON.stringify({ message: document.getElementById("message").value })
-//   );
-// });
+const handlePlayerEvents = (message) => {
+  let data = JSON.parse(message.body);
+  let client = clients.find((c) => c.userId == data.clientID);
+  if (client) {
+    client.x = data.x;
+    client.y = data.y;
+    client.angle = data.angle;
+  } else {
+    clients.push(
+      new Player(
+        myGameArea,
+        data.clientID,
+        30,
+        30,
+        "black",
+        data.x,
+        data.y,
+        data.angle
+      )
+    );
+  }
+};
+
+const processGameObjectsArray = (gameObjects, isClient = false) => {
+  for (let i = 0; i < gameObjects.length; i++) {
+    //processClients
+    if (isClient) {
+      if (gameObjects[i] instanceof Player) {
+        gameObjects[i].update();
+      } else if (gameObjects[i] instanceof Bullet) {
+        gameObjects[i].update();
+        if (
+          gameObjects[i].x > gameWidth ||
+          gameObjects[i].x < 0 ||
+          gameObjects[i].y > gameHeight ||
+          gameObjects[i].y < 0
+        ) {
+          gameObjects.splice(i, 1);
+          continue;
+        }
+        gameObjects[i].checkCollision(gameObjects);
+      }
+      continue;
+    }
+
+    //process player objects
+    gameObjects[i].moveAngle = 0;
+    gameObjects[i].speed = 0;
+    if (gameObjects[i] instanceof Player) {
+      if (myGameArea.keys[37] || myGameArea.keys[65]) {
+        gameObjects[i].moveAngle = -5;
+      }
+      if (myGameArea.keys[39] || myGameArea.keys[68]) {
+        gameObjects[i].moveAngle = 5;
+      }
+      if (myGameArea.keys[38] || myGameArea.keys[87]) {
+        gameObjects[i].speed = 5;
+      }
+      if (myGameArea.keys[40] || myGameArea.keys[83]) {
+        gameObjects[i].speed = -5;
+      }
+
+      gameObjects[i].newPos();
+      gameObjects[i].update();
+      if (gameObjects[i].hasPositionChanged()) {
+        sendPosition(gameObjects[i]);
+      }
+    }
+
+    if (gameObjects[i] instanceof Bullet) {
+      gameObjects[i].update();
+      if (
+        gameObjects[i].x > gameWidth ||
+        gameObjects[i].x < 0 ||
+        gameObjects[i].y > gameHeight ||
+        gameObjects[i].y < 0
+      ) {
+        gameObjects.splice(i, 1);
+        continue;
+      }
+      gameObjects[i].checkCollision(gameObjects);
+    }
+  }
+};
+
+const handleBulletEvents = (message) => {
+  let data = JSON.parse(message.body);
+  clients.push(
+    new Bullet(myGameArea, data.clientID, data.x, data.y, data.angle)
+  );
+};

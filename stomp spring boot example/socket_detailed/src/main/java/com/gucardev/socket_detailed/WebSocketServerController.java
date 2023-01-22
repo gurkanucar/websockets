@@ -1,10 +1,11 @@
 package com.gucardev.socket_detailed;
 
+import com.gucardev.socket_detailed.model.BulletState;
+import com.gucardev.socket_detailed.model.GameObjectState;
+import com.gucardev.socket_detailed.model.GameObjectType;
+import com.gucardev.socket_detailed.model.PlayerState;
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -14,7 +15,6 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
-import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.simp.user.SimpSession;
 import org.springframework.messaging.simp.user.SimpUser;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
@@ -53,7 +53,9 @@ public class WebSocketServerController {
 
   @MessageMapping("/game/{room}")
   public void handleMessage(
-      @DestinationVariable String room, @Payload PlayerState playerState, Principal principal) {
+      @DestinationVariable String room,
+      @Payload GameObjectState gameObjectState,
+      Principal principal) {
 
     // messagingTemplate.convertAndSend("/topic/game/" + room, playerState);
 
@@ -66,7 +68,13 @@ public class WebSocketServerController {
             .anyMatch(subscription -> subscription.getDestination().endsWith(room))) {
           // If the user is subscribed to the room, add their userId to the list
           if (!user.getName().equals(principal.getName())) {
-            messagingTemplate.convertAndSendToUser(user.getName(), "/queue/reply", playerState);
+            if (gameObjectState.getType().equals(GameObjectType.PLAYER)) {
+              messagingTemplate.convertAndSendToUser(
+                  user.getName(), "/queue/player", new PlayerState(gameObjectState));
+            } else {
+              messagingTemplate.convertAndSendToUser(
+                  user.getName(), "/queue/bullet", new BulletState(gameObjectState));
+            }
           }
           // usersInRoom.add(user.getName());
         }
